@@ -7,7 +7,7 @@ Google Maps 위에 행사 부스, 무대, 텐트, 편의시설, 통로와 행사
 ### Windows
 
 1. 압축을 풉니다.
-2. `실행하기.bat`를 더블클릭합니다.
+2. `run.bat`를 더블클릭합니다.
 3. 브라우저에서 `http://localhost:8080`이 열립니다.
 4. 처음 화면에서 Google Maps API 키를 입력합니다.
 
@@ -102,7 +102,7 @@ saegim-event-map-editor/
 │  └─ style.css
 ├─ js/
 │  └─ app.js
-├─ 실행하기.bat
+├─ run.bat
 └─ README.md
 ```
 
