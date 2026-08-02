@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "event": {
+    "title": "새김 테스트 행사",
+    "description": "행사 지도 편집기 기능 확인용 샘플입니다.",
+    "notice": "샘플 데이터입니다. 시설물을 선택해 위치와 내용을 자유롭게 수정하세요.",
+    "center": { "lat": 35.09755, "lng": 129.01075 },
+    "zoom": 20,
+    "mapTypeId": "roadmap",
+    "gridOrigin": { "lat": 35.09755, "lng": 129.01075 },
+    "gridSize": 2,
+    "gridVisible": true
+  },
+  "elements": [
+    {
+      "id": "sample-zone-1",
+      "type": "zone",
+      "shape": "zone",
+      "name": "행사 운영 구역",
+      "code": "ZONE-A",
+      "description": "샘플 행사장 경계입니다.",
+      "color": "#f59e0b",
+      "visible": true,
+      "locked": false,
+      "points": [
+        { "lat": 35.09768, "lng": 129.01056 },
+        { "lat": 35.09768, "lng": 129.01094 },
+        { "lat": 35.09740, "lng": 129.01094 },
+        { "lat": 35.09740, "lng": 129.01056 }
+      ],
+      "strokeWidth": 2,
+      "opacity": 0.13
+    },
+    {
+      "id": "sample-stage-1",
+      "type": "stage",
+      "shape": "rect",
+      "name": "메인 무대",
+      "code": "STAGE",
+      "description": "공연과 개막식이 진행되는 메인 무대입니다.",
+      "color": "#7c3aed",
+      "visible": true,
+      "locked": false,
+      "center": { "lat": 35.09761, "lng": 129.01075 },
+      "width": 12,
+      "height": 8,
+      "opacity": 0.48
+    },
+    {
+      "id": "sample-booth-1",
+      "type": "booth",
+      "shape": "rect",
+      "name": "새김 체험 부스",
+      "code": "A-01",
+      "description": "레이저 각인 체험 부스입니다.",
+      "color": "#2563eb",
+      "visible": true,
+      "locked": false,
+      "center": { "lat": 35.09749, "lng": 129.01066 },
+      "width": 3,
+      "height": 3,
+      "opacity": 0.48
+    },
+    {
+      "id": "sample-booth-2",
+      "type": "food",
+      "shape": "rect",
+      "name": "푸드 부스",
+      "code": "F-01",
+      "description": "간단한 먹거리와 음료를 판매합니다.",
+      "color": "#ea580c",
+      "visible": true,
+      "locked": false,
+      "center": { "lat": 35.09749, "lng": 129.01082 },
+      "width": 4,
+      "height": 3,
+      "opacity": 0.48
+    },
+    {
+      "id": "sample-path-1",
+      "type": "path",
+      "shape": "path",
+      "name": "주요 관람 동선",
+      "code": "ROUTE-1",
+      "description": "출입구에서 무대와 체험 부스로 이어지는 동선입니다.",
+      "color": "#111827",
+      "visible": true,
+      "locked": false,
+      "points": [
+        { "lat": 35.09739, "lng": 129.01075 },
+        { "lat": 35.09749, "lng": 129.01075 },
+        { "lat": 35.09757, "lng": 129.01075 }
+      ],
+      "strokeWidth": 5,
+      "accessible": true
+    },
+    {
+      "id": "sample-toilet-1",
+      "type": "toilet",
+      "shape": "point",
+      "name": "화장실",
+      "code": "WC",
+      "description": "행사장 남동쪽 화장실입니다.",
+      "color": "#0891b2",
+      "visible": true,
+      "locked": false,
+      "position": { "lat": 35.09743, "lng": 129.01091 },
+      "icon": "🚻"
+    },
+    {
+      "id": "sample-entrance-1",
+      "type": "entrance",
+      "shape": "point",
+      "name": "주 출입구",
+      "code": "GATE-1",
+      "description": "행사장 주 출입구입니다.",
+      "color": "#16a34a",
+      "visible": true,
+      "locked": false,
+      "position": { "lat": 35.09739, "lng": 129.01075 },
+      "icon": "🚪"
+    }
+  ]
+}

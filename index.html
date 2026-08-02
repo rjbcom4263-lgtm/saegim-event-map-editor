@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>새김 행사 지도 편집기</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div id="apiGate" class="api-gate" hidden>
+    <div class="api-card">
+      <div class="brand-mark">새김</div>
+      <h1>Google Maps 연결</h1>
+      <p>Maps JavaScript API 키를 입력하면 이 브라우저에만 저장됩니다.</p>
+      <label class="field-label" for="apiKeyInput">Google Maps API 키</label>
+      <input id="apiKeyInput" class="input" type="password" autocomplete="off" placeholder="AIza..." />
+      <label class="field-label" for="mapIdInput">Map ID <span class="muted">(선택)</span></label>
+      <input id="mapIdInput" class="input" type="text" autocomplete="off" placeholder="없으면 DEMO_MAP_ID 사용" />
+      <div id="apiGateError" class="error-text" role="alert"></div>
+      <button id="connectMapsBtn" class="btn primary wide">Google Maps 연결</button>
+      <details>
+        <summary>API 설정에 필요한 항목</summary>
+        <p>Google Cloud에서 Maps JavaScript API와 Places API를 활성화하고, 웹사이트 제한을 설정하세요.</p>
+      </details>
+    </div>
+  </div>
+
+  <div id="app" class="app-shell" hidden>
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-btn mobile-only" aria-label="도구 열기">☰</button>
+        <div class="brand">
+          <span class="brand-mark small">새김</span>
+          <div>
+            <input id="eventNameInput" class="event-name" value="새 행사 지도" aria-label="행사명" />
+            <div id="saveStatus" class="save-status">저장됨</div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="undoBtn" class="btn ghost" title="실행 취소 (Ctrl+Z)">↶ <span>취소</span></button>
+        <button id="redoBtn" class="btn ghost" title="다시 실행 (Ctrl+Shift+Z)">↷ <span>다시</span></button>
+        <button id="saveBtn" class="btn ghost">저장</button>
+        <button id="exportBtn" class="btn ghost">JSON 내보내기</button>
+        <label class="btn ghost file-label">JSON 불러오기<input id="importInput" type="file" accept="application/json,.json" hidden /></label>
+        <button id="previewBtn" class="btn primary">사용자 미리보기</button>
+        <button id="settingsBtn" class="icon-btn" aria-label="설정">⚙</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside id="leftPanel" class="left-panel">
+        <section class="panel-section">
+          <div class="section-title">편집 도구</div>
+          <div class="tool-grid" id="toolGrid">
+            <button class="tool active" data-tool="select"><span>↖</span><b>선택</b></button>
+            <button class="tool" data-tool="booth"><span>▣</span><b>부스</b></button>
+            <button class="tool" data-tool="stage"><span>▰</span><b>무대</b></button>
+            <button class="tool" data-tool="tent"><span>⌂</span><b>텐트</b></button>
+            <button class="tool" data-tool="food"><span>▤</span><b>푸드</b></button>
+            <button class="tool" data-tool="toilet"><span>WC</span><b>화장실</b></button>
+            <button class="tool" data-tool="info"><span>i</span><b>안내소</b></button>
+            <button class="tool" data-tool="entrance"><span>⇥</span><b>출입구</b></button>
+            <button class="tool" data-tool="path"><span>⌁</span><b>통로</b></button>
+            <button class="tool" data-tool="curve"><span>⌒</span><b>곡선</b></button>
+            <button class="tool" data-tool="zone"><span>⬡</span><b>구역</b></button>
+            <button class="tool" data-tool="text"><span>T</span><b>텍스트</b></button>
+          </div>
+          <p id="toolHint" class="tool-hint">시설물을 클릭해 선택하거나 지도를 이동하세요.</p>
+        </section>
+
+        <section class="panel-section grow">
+          <div class="section-row">
+            <div class="section-title">레이어</div>
+            <span id="layerCount" class="pill">0</span>
+          </div>
+          <input id="layerSearch" class="input compact" type="search" placeholder="이름·번호 검색" />
+          <div id="layerList" class="layer-list"></div>
+        </section>
+      </aside>
+
+      <section class="map-area">
+        <div class="map-toolbar">
+          <div class="search-wrap">
+            <span>⌕</span>
+            <input id="placeSearch" type="search" placeholder="행사장 또는 주소 검색" />
+          </div>
+          <button id="locateBtn" class="map-chip">현재 위치</button>
+          <button id="mapTypeBtn" class="map-chip">위성 보기</button>
+          <label class="map-chip switch-chip"><input id="labelsToggle" type="checkbox" /> 라벨 숨김</label>
+          <label class="map-chip switch-chip"><input id="gridToggle" type="checkbox" /> 격자</label>
+          <select id="gridSizeSelect" class="map-chip select-chip" aria-label="격자 크기">
+            <option value="1">1m</option>
+            <option value="2">2m</option>
+            <option value="5" selected>5m</option>
+            <option value="10">10m</option>
+          </select>
+        </div>
+        <div id="map"></div>
+        <div id="drawGuide" class="draw-guide" hidden>
+          <b id="drawGuideTitle">통로 그리기</b>
+          <span id="drawGuideText">지도를 클릭해 점을 추가하세요.</span>
+          <button id="finishDrawBtn" class="btn small primary">완료</button>
+          <button id="cancelDrawBtn" class="btn small ghost">취소</button>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </section>
+
+      <aside id="rightPanel" class="right-panel">
+        <div class="right-tabs">
+          <button class="right-tab active" data-tab="properties">속성</button>
+          <button class="right-tab" data-tab="event">행사 설정</button>
+        </div>
+
+        <section id="propertiesTab" class="right-content">
+          <div id="emptyProperties" class="empty-state">
+            <div class="empty-icon">↖</div>
+            <h2>시설물을 선택하세요</h2>
+            <p>지도 또는 레이어 목록에서 항목을 선택하면 이름, 크기, 설명을 수정할 수 있습니다.</p>
+          </div>
+          <form id="propertiesForm" class="properties-form" hidden>
+            <div class="selection-heading">
+              <div>
+                <span id="selectedTypeBadge" class="type-badge">부스</span>
+                <h2 id="selectedHeading">시설물</h2>
+              </div>
+              <button id="closeSelectionBtn" type="button" class="icon-btn">×</button>
+            </div>
+
+            <label class="field-label">이름</label>
+            <input id="propName" class="input" type="text" />
+
+            <label class="field-label">번호·코드</label>
+            <input id="propCode" class="input" type="text" placeholder="예: A-01" />
+
+            <label class="field-label">설명</label>
+            <textarea id="propDescription" class="input textarea" rows="4" placeholder="사용자에게 보여줄 상세 설명"></textarea>
+
+            <div class="two-cols">
+              <div>
+                <label class="field-label">색상</label>
+                <input id="propColor" class="color-input" type="color" />
+              </div>
+              <div id="opacityField">
+                <label class="field-label">투명도</label>
+                <input id="propOpacity" class="range" type="range" min="0.05" max="0.9" step="0.05" />
+              </div>
+            </div>
+
+            <div id="sizeFields" class="two-cols">
+              <div>
+                <label class="field-label">가로 (m)</label>
+                <input id="propWidth" class="input" type="number" min="0.5" step="0.5" />
+              </div>
+              <div>
+                <label class="field-label">세로 (m)</label>
+                <input id="propHeight" class="input" type="number" min="0.5" step="0.5" />
+              </div>
+            </div>
+
+            <div id="pathFields" class="two-cols">
+              <div>
+                <label class="field-label">선 굵기</label>
+                <input id="propStrokeWidth" class="input" type="number" min="1" max="20" step="1" />
+              </div>
+              <label class="check-field"><input id="propAccessible" type="checkbox" /> 무장애 통로</label>
+            </div>
+
+            <div id="pointFields">
+              <label class="field-label">아이콘</label>
+              <select id="propIcon" class="input">
+                <option value="🚻">🚻 화장실</option>
+                <option value="ℹ️">ℹ️ 안내소</option>
+                <option value="🚪">🚪 출입구</option>
+                <option value="🅿️">🅿️ 주차장</option>
+                <option value="🚑">🚑 응급</option>
+                <option value="📍">📍 위치</option>
+              </select>
+            </div>
+
+            <div class="two-cols coordinate-fields">
+              <div>
+                <label class="field-label">위도</label>
+                <input id="propLat" class="input" type="number" step="0.000001" />
+              </div>
+              <div>
+                <label class="field-label">경도</label>
+                <input id="propLng" class="input" type="number" step="0.000001" />
+              </div>
+            </div>
+
+            <div class="toggle-list">
+              <label><input id="propVisible" type="checkbox" /> 지도에 표시</label>
+              <label><input id="propLocked" type="checkbox" /> 위치 잠금</label>
+            </div>
+
+            <div class="property-actions">
+              <button id="duplicateBtn" type="button" class="btn ghost">복제</button>
+              <button id="layerUpBtn" type="button" class="btn ghost">앞으로</button>
+              <button id="layerDownBtn" type="button" class="btn ghost">뒤로</button>
+              <button id="deleteBtn" type="button" class="btn danger">삭제</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="eventTab" class="right-content" hidden>
+          <h2>행사 설정</h2>
+          <label class="field-label">행사명</label>
+          <input id="eventTitleSetting" class="input" type="text" />
+          <label class="field-label">행사 설명</label>
+          <textarea id="eventDescription" class="input textarea" rows="5"></textarea>
+          <label class="field-label">공개 안내 문구</label>
+          <textarea id="eventNotice" class="input textarea" rows="4" placeholder="예: 우천 시 일부 프로그램이 변경될 수 있습니다."></textarea>
+          <hr />
+          <div class="section-title">지도 중심</div>
+          <p class="muted">현재 지도 위치와 확대 수준을 행사 기본 화면으로 저장합니다.</p>
+          <button id="setDefaultViewBtn" class="btn ghost wide">현재 화면을 기본 위치로 저장</button>
+          <hr />
+          <div class="section-title">데이터 초기화</div>
+          <button id="clearAllBtn" class="btn danger wide">모든 시설물 삭제</button>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="preview" class="preview-shell" hidden>
+    <header class="preview-header">
+      <div>
+        <div class="preview-eyebrow">행사 안내 지도</div>
+        <h1 id="previewTitle">새 행사 지도</h1>
+      </div>
+      <button id="exitPreviewBtn" class="btn ghost light">편집기로 돌아가기</button>
+    </header>
+    <div class="preview-main">
+      <div id="previewMap"></div>
+      <div class="preview-search-panel">
+        <input id="previewSearch" class="input" type="search" placeholder="부스·시설물 검색" />
+        <div id="previewNotice" class="preview-notice"></div>
+        <div id="previewList" class="preview-list"></div>
+      </div>
+      <div id="previewDetail" class="preview-detail" hidden>
+        <button id="closePreviewDetail" class="icon-btn">×</button>
+        <span id="previewDetailType" class="type-badge"></span>
+        <h2 id="previewDetailName"></h2>
+        <div id="previewDetailCode" class="preview-code"></div>
+        <p id="previewDetailDescription"></p>
+        <a id="directionsLink" class="btn primary wide" href="#" target="_blank" rel="noopener">Google Maps로 길찾기</a>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog">
+      <div class="dialog-heading">
+        <h2>설정</h2>
+        <button class="icon-btn" value="cancel">×</button>
+      </div>
+      <label class="field-label">Google Maps API 키</label>
+      <input id="settingsApiKey" class="input" type="password" />
+      <label class="field-label">Map ID</label>
+      <input id="settingsMapId" class="input" type="text" />
+      <p class="muted">키를 변경하면 페이지가 새로고침됩니다.</p>
+      <div class="dialog-actions">
+        <button id="resetApiBtn" type="button" class="btn danger">연결 정보 삭제</button>
+        <button id="applySettingsBtn" type="button" class="btn primary">저장 후 새로고침</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
